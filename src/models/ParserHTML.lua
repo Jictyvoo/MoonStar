@@ -52,6 +52,14 @@ function ParserHTML:writeTokenEnd(column)
     self.lexycalAttributes.tagLexeme = {}
 end
 
+function ParserHTML:writeTagContent()
+    if #self.lexycalAttributes.tagLexeme > 0 then
+        local content = tableString(self.lexycalAttributes.tagLexeme):lower()
+        table.insert(self.tokenList, Token(content, "content", self.lexycalAttributes.lineCount, 0, self.filename))
+        self.lexycalAttributes.tagLexeme = {}
+    end
+end
+
 function ParserHTML:deepParse(data)
     --[[ verifying if is a tag start--]]
     local splited = self:splitString(data)
@@ -85,8 +93,11 @@ function ParserHTML:deepParse(data)
             end
         else
             if word == "<" then
+                self:writeTagContent()
                 self.lexycalAttributes.openTag = true
                 self:createTagInfo()
+            else
+                table.insert(self.lexycalAttributes.tagLexeme, word)
             end
         end
         self.lexycalAttributes.previous = word
