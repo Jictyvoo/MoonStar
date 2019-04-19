@@ -1,4 +1,10 @@
+# Ignoring compiled file to test
 main
+
+# Ignoring test files
 *.lua.c
 *.debug
 *.html
+
+# Ignoring project folder
+.vscode/
