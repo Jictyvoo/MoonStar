@@ -4,6 +4,7 @@ main
 # Ignoring test files
 *.lua.c
 *.debug
+*.moon
 *.html
 
 # Ignoring project folder

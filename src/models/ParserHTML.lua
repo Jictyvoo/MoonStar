@@ -1,5 +1,7 @@
 local ParserHTML = {}
+local HTMLTree = require("models.HTMLTree")
 local Token = require("models.value.Token")
+local Tag = require("models.value.Tag")
 
 ParserHTML.__index = ParserHTML
 
@@ -17,8 +19,8 @@ function ParserHTML:new(data)
             openTag = false, openString = false, current = {}, isAttribute = false,
             previous = nil, tagLexeme = {}, tagInfo = nil, lineCount = 1, openComment = false
         },
-        data = data, result = {}, tokenList = {}, filename = "direct-parse",
-        tags = {}, ids = {}
+        data = data, htmlTree = nil, tokenList = {}, filename = "direct-parse",
+        tags = {}, elements = {}, closeTags = {["/!document"] = true}
     }, ParserHTML)
 end
 
@@ -27,7 +29,7 @@ local function tableString(stringTable)
 end
 
 function ParserHTML:createTagInfo()
-    self.lexycalAttributes.tagInfo = {name = "", attributes = {}}
+    self.lexycalAttributes.tagInfo = {name = "", attributes = {}, lastAttribute = "", content = "", children = {}}
 end
 
 function ParserHTML:splitString(toSplit)
@@ -42,12 +44,12 @@ function ParserHTML:writeTokenEnd(column)
         if self.lexycalAttributes.tagInfo.name == "" then
             self.lexycalAttributes.tagInfo.name = name
             local tagType = name:sub(1, 3) == "!--" and "open-comment" or name:sub(1, 1) == "/" and "close-tag" or "open-tag"
-            if tagType == "open-comment" then self.lexycalAttributes.openComment = true end
-            table.insert(self.tokenList, Token(name, tagType, self.lexycalAttributes.lineCount, column, self.filename))
+            if tagType == "open-comment" then self.lexycalAttributes.openComment = true elseif tagType == "close-tag" then self.closeTags[name] = true end
+            table.insert(self.tokenList, Token(name, tagType, self.lexycalAttributes.lineCount, column - #name, self.filename))
         else
             self.lexycalAttributes.tagInfo.attributes[name] = ""
             self.lexycalAttributes.tagInfo.lastAttribute = name
-            table.insert(self.tokenList, Token(name, "attribute", self.lexycalAttributes.lineCount, column, self.filename))
+            table.insert(self.tokenList, Token(name, "attribute", self.lexycalAttributes.lineCount, column - #name, self.filename))
         end
     end
     self.lexycalAttributes.tagLexeme = {}
@@ -55,7 +57,8 @@ end
 
 function ParserHTML:writeTagContent()
     if #self.lexycalAttributes.tagLexeme > 0 then
-        local content = tableString(self.lexycalAttributes.tagLexeme):lower()
+        local content = tableString(self.lexycalAttributes.tagLexeme)
+        self.lexycalAttributes.tagInfo.content = content
         table.insert(self.tokenList, Token(content, "content", self.lexycalAttributes.lineCount, 0, self.filename))
         self.lexycalAttributes.tagLexeme = {}
     end
@@ -100,6 +103,13 @@ function ParserHTML:deepParse(data)
                     local currentLexeme = tableString(self.lexycalAttributes.current)
                     self.lexycalAttributes.current = {}
                     table.insert(self.tokenList, Token(currentLexeme, "string", self.lexycalAttributes.lineCount, _, self.filename))
+                    if self.lexycalAttributes.tagInfo.lastAttribute ~= "" and self.tokenList[#self.tokenList - 1].getType() == "attributition" then
+                        self.lexycalAttributes.tagInfo.attributes[self.lexycalAttributes.tagInfo.lastAttribute] = currentLexeme
+                        if not self.elements[self.lexycalAttributes.tagInfo.lastAttribute] then
+                            self.elements[self.lexycalAttributes.tagInfo.lastAttribute] = {}
+                        end
+                        table.insert(self.elements[self.lexycalAttributes.tagInfo.lastAttribute], Tag(self.lexycalAttributes.tagInfo))
+                    end
                 elseif isQuotation and not self.lexycalAttributes.openString then
                     self.lexycalAttributes.openString = word
                 else
@@ -108,6 +118,7 @@ function ParserHTML:deepParse(data)
             elseif word == ">" then
                 self.lexycalAttributes.openTag = false
                 self:writeTokenEnd(_)
+                self.lexycalAttributes.tagInfo.lastAttribute = nil; table.insert(self.tags, Tag(self.lexycalAttributes.tagInfo))
             else
                 if word ~= string.char(9) and word ~= string.char(32) and word ~= "=" then
                     table.insert(self.lexycalAttributes.tagLexeme, word)
@@ -131,8 +142,12 @@ function ParserHTML:deepParse(data)
     end
 end
 
+function ParserHTML:generateHTMLTree()
+    self.htmlTree = HTMLTree(self.tags, self.elements, self.closeTags)
+end
+
 function ParserHTML:parse(data, isFile)
-    self.lexycalAttributes.lineCount = 1
+    self.lexycalAttributes.lineCount = 1; self.htmlTree = nil
     if data or not isFile then
         self.filename = "direct-parse"
         self:deepParse(data or self.data)
@@ -143,8 +158,12 @@ function ParserHTML:parse(data, isFile)
             self.lexycalAttributes.lineCount = self.lexycalAttributes.lineCount + 1
         end
     end
-    self.data = false; self.isFile = false
+    self.data = false; self.isFile = false; self:generateHTMLTree()
+end
+
+function ParserHTML:getHTMLTree()
+    if not self.htmlTree then self:generateHTMLTree() end
+    return self.htmlTree
 end
 
 return ParserHTML
-

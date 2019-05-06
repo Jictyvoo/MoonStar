@@ -1,6 +1,6 @@
-# WebMole
+# StarMoon
 
-Is a library that helps Lua User to make connections with web pages and do a scrapping in it.
+Is a program that helps Lapis User to convert html pages to Moonscript pages.
 
 ## Components
 
@@ -8,10 +8,10 @@ Is a library that helps Lua User to make connections with web pages and do a scr
 
 Is a html parser that helps to find elements by id and also by tag type. This parser was designed to accept anytime of tag. Obs, comment tags are ignored.
 
-### MoleScrapper
+## Usage
 
-Is the web component, that allows you to download pages and also make POST/GET request with all pages.
+Run the binary file with your html file as argument. You can too import the program source and use it to parse a specific part of an HTML.
 
-### Depedencies
+## Goals
 
-* Luasocket - http://w3.impa.br/~diego/software/luasocket/home.html
+* Fix a bug when have a tag that can be closed or not closed
