@@ -69,7 +69,7 @@ HTMLTree = setmetatable(HTMLTree, {
                     end
                     if stack.peek() then
                         stack.pop()
-                        if #tag.getContent() > 0 then
+                        if #tag.getContent() > 0 and tag.getContent():gsub("\t+", ""):match("%S") ~= nil then                            
                             local pseudoTag = this.documentRoot(); pseudoTag.setName("text")
                             pseudoTag.setContent(tag.getContent())
                             if stack.peek() then stack.peek().addChild(pseudoTag) end
@@ -86,7 +86,7 @@ HTMLTree = setmetatable(HTMLTree, {
                     end
                     if closeTags["/" .. tag.getName()] then
                         stack.push(tag)
-                    elseif #tag.getContent() > 0 then
+                    elseif #tag.getContent() > 0 and tag.getContent():gsub("\t+", ""):match("%S") ~= nil then                        
                         local pseudoTag = this.documentRoot(); pseudoTag.setName("text")
                         pseudoTag.setContent(tag.getContent())
                         if stack.peek() then
