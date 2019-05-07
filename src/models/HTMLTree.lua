@@ -68,7 +68,8 @@ HTMLTree = setmetatable(HTMLTree, {
                         stack.pop()
                     end
                     if stack.peek() then
-                        stack.pop(); stack.peek().addChild(tag.getContent())
+                        stack.pop()
+                        if stack.peek() then stack.peek().addChild(tag.getContent()) end
                     else
                         error("Syntax error found")
                     end

@@ -46,7 +46,7 @@ function ParserHTML:writeTokenEnd(column)
             local tagType = name:sub(1, 3) == "!--" and "open-comment" or name:sub(1, 1) == "/" and "close-tag" or "open-tag"
             if tagType == "open-comment" then self.lexycalAttributes.openComment = true elseif tagType == "close-tag" then self.closeTags[name] = true end
             table.insert(self.tokenList, Token(name, tagType, self.lexycalAttributes.lineCount, column - #name, self.filename))
-        else
+        elseif name ~= "/" then
             self.lexycalAttributes.tagInfo.attributes[name] = ""
             self.lexycalAttributes.tagInfo.lastAttribute = name
             table.insert(self.tokenList, Token(name, "attribute", self.lexycalAttributes.lineCount, column - #name, self.filename))
