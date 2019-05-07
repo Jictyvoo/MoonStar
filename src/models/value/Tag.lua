@@ -21,8 +21,10 @@ Tag = setmetatable(Tag, {
         this.tabs = 2
         return setmetatable({
             getName = function() return this.name end,
+            setName = function(name) this.name = name end,
             getAttributes = function() return this.attributes end,
             getContent = function() return this.content end,
+            setContent = function(content) this.content = content end,
             getChildren = function() return this.children end,
             addChild = function(child) table.insert(this.children, child) end,
             setTabNumber = function(total) this.tabs = total end,
@@ -46,6 +48,7 @@ Tag = setmetatable(Tag, {
             contentString = " \"" .. contentString .. "\""
             openClose = openClose + 1
             if needComma then contentString = "," .. contentString end
+            needComma = true
         end
         local childrenString = ""
         if #self.getChildren() > 0 then

@@ -69,14 +69,30 @@ HTMLTree = setmetatable(HTMLTree, {
                     end
                     if stack.peek() then
                         stack.pop()
-                        if stack.peek() then stack.peek().addChild(tag.getContent()) end
+                        if #tag.getContent() > 0 then
+                            local pseudoTag = this.documentRoot(); pseudoTag.setName("text")
+                            pseudoTag.setContent(tag.getContent())
+                            if stack.peek() then stack.peek().addChild(pseudoTag) end
+                        end
                     else
                         error("Syntax error found")
                     end
                 else
-                    stack.peek().addChild(tag)
+                    if stack.peek() then
+                        stack.peek().addChild(tag)
+                    else
+                        local newTag = (this.documentRoot)(); newTag.setName("div")
+                        newTag.addChild(this.documentRoot); newTag.addChild(tag); this.documentRoot = newTag
+                    end
                     if closeTags["/" .. tag.getName()] then
                         stack.push(tag)
+                    elseif #tag.getContent() > 0 then
+                        local pseudoTag = this.documentRoot(); pseudoTag.setName("text")
+                        pseudoTag.setContent(tag.getContent())
+                        if stack.peek() then
+                            tag.setContent("")
+                            stack.peek().addChild(pseudoTag)
+                        end
                     end
                 end
             end

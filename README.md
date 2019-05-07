@@ -1,6 +1,6 @@
-# StarMoon
+# MoonStar
 
-Is a program that helps Lapis User to convert html pages to Moonscript pages.
+Is a program that helps Lapis User to convert html pages to Moonscript pages. If has a problem with your HTML, MoonStar tries to fix it, and work properly
 
 ## Components
 
@@ -15,5 +15,3 @@ Run the binary file with your html file as argument. You can too import the prog
 ## Goals
 
 * Fix a bug when have a tag that can be closed or not closed
-* Fix a bug that use single tag like `<br/>` and bugs moonscript
-* Fix a bug with attributes names like "http-element"
