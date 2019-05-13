@@ -1,11 +1,13 @@
 # Ignoring compiled file to test
 main
+moonstar
 
 # Ignoring test files
 *.lua.c
 *.debug
 *.moon
 *.html
+*.php
 
 # Ignoring project folder
 .vscode/

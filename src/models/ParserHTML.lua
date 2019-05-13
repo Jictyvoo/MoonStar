@@ -28,8 +28,8 @@ local function tableString(stringTable)
     return string.format(("%s"):rep(#stringTable), table.unpack(stringTable))
 end
 
-function ParserHTML:createTagInfo()
-    self.lexycalAttributes.tagInfo = {name = "", attributes = {}, lastAttribute = "", content = "", children = {}}
+function ParserHTML:createTagInfo(name)
+    self.lexycalAttributes.tagInfo = {name = name or "", attributes = {}, lastAttribute = "", content = "", children = {}}
 end
 
 function ParserHTML:splitString(toSplit)
@@ -132,6 +132,10 @@ function ParserHTML:deepParse(data)
         else
             if word == "<" and splited[_ + 1] ~= string.char(9) and splited[_ + 1] ~= string.char(32) then
                 self:writeTagContent()
+                if #self.tags <= 0 and #self.lexycalAttributes.tagInfo.content > 0 then
+                    table.insert(self.tags, Tag({name = "div", attributes = {}, content = "", children = {}}))
+                    table.insert(self.tags, Tag(self.lexycalAttributes.tagInfo))
+                end
                 self.lexycalAttributes.openTag = true
                 self:createTagInfo()
             else
@@ -147,6 +151,7 @@ function ParserHTML:generateHTMLTree()
 end
 
 function ParserHTML:parse(data, isFile)
+    self:createTagInfo()
     self.lexycalAttributes.lineCount = 1; self.htmlTree = nil
     if data or not isFile then
         self.filename = "direct-parse"

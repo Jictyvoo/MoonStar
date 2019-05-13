@@ -57,6 +57,10 @@ HTMLTree = setmetatable(HTMLTree, {
         for name, tag in pairs(elements) do
             returnObject[string.format("getElementsBy%s", name:gsub("^%l", string.upper))] = function() return elements[name] end
         end
+        local function createNewRoot(tag)
+            local newTag = (this.documentRoot)(); newTag.setName("div")
+            newTag.addChild(this.documentRoot); newTag.addChild(tag); this.documentRoot = newTag
+        end
         --[[ Here will be construct the synthatic tree --]]
         local stack = Stack:new()
         for _, tag in pairs(tags) do
@@ -75,21 +79,24 @@ HTMLTree = setmetatable(HTMLTree, {
                             if stack.peek() then stack.peek().addChild(pseudoTag) end
                         end
                     else
-                        error("Syntax error found")
+                        createNewRoot(tag)
+                        --[[ error("Syntax error found") --]]
                     end
                 else
                     if stack.peek() then
                         stack.peek().addChild(tag)
                     else
-                        local newTag = (this.documentRoot)(); newTag.setName("div")
-                        newTag.addChild(this.documentRoot); newTag.addChild(tag); this.documentRoot = newTag
+                        createNewRoot(tag)
                     end
                     if closeTags["/" .. tag.getName()] then
                         stack.push(tag)
-                    elseif #tag.getContent() > 0 and tag.getContent():gsub("\t+", ""):match("%S") ~= nil then                        
-                        local pseudoTag = this.documentRoot(); pseudoTag.setName("text")
-                        pseudoTag.setContent(tag.getContent())
-                        if stack.peek() then
+                    elseif #tag.getContent() > 0 and tag.getContent():gsub("\t+", ""):match("%S") ~= nil then 
+                        local pseudoTag = tag
+                        if #tag.getName() > 0 then                       
+                            pseudoTag = this.documentRoot()
+                        end
+                        pseudoTag.setName("text"); pseudoTag.setContent(tag.getContent())
+                        if stack.peek() and tag ~= pseudoTag then
                             tag.setContent("")
                             stack.peek().addChild(pseudoTag)
                         end

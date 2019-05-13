@@ -20,5 +20,5 @@ function loop() {
 loop "."
 allFilenames="${allFilenames//'./'/''}"
 luastatic "main.lua" $allFilenames /usr/lib/x86_64-linux-gnu/liblua5.3.a -I/usr/include/lua5.3
-mv main ../
+mv main ../moonstar
 # echo $allFilenames
