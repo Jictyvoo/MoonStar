@@ -17,7 +17,7 @@ Run the binary file with your html file as argument. You can too import the prog
 To use library in your project, execute command below on your project repository
 
 ```shell
-git add submodule https://github.com/Jictyvoo/MoonStar
+git submodule add https://github.com/Jictyvoo/MoonStar
 ```
 After that you can import the library easily, like
 
@@ -35,6 +35,8 @@ Below you can see all methods
 ```
 
 * parse(data, isFile) - This function is the main function called, is the same function called in __call
+
+* deepParse(data) - This function is when you don't have all html data complete at once. So, you can use this function a lot of times to parse your splited file.
 
 * getHTMLTree() - This Function return the HTML Tree of the data passed. The HTML Tree returned has the main method "getDocument" that will returns the root tag, it is, the first tag in your document, or a DIV auto-generated to help parse document.
 
