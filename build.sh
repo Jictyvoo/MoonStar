@@ -7,7 +7,7 @@ function loop() {
         if [ -d "$i" ]; then
             loop "$i"
         elif [ -e "$i" ]; then
-            if [[ "$i" != "./main.lua" && "$i" != "./main.lua.c" ]]; then
+            if [[ "$i" != "./main.lua" && "$i" != "./main.lua.c" && "$i" == *.lua ]]; then
                 # echo "Found $i"
                 allFilenames="$allFilenames $i"
             fi
