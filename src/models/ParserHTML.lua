@@ -1,7 +1,13 @@
 local ParserHTML = {}
-local HTMLTree = require("models.HTMLTree")
-local Token = require("models.value.Token")
-local Tag = require("models.value.Tag")
+
+--[[ Imports --]]
+local currentPath = (...):gsub('%.ParserHTML$', '') .. "."
+local HTMLTree = require(string.format("%sHTMLTree", currentPath))
+local Token = require(string.format("%svalue.Token", currentPath))
+local Tag = require(string.format("%svalue.Tag", currentPath))
+--[[ local HTMLTree = require("models.HTMLTree") --]]
+--[[ local Token = require("models.value.Token") --]]
+--[[ local Tag = require("models.value.Tag") --]]
 
 ParserHTML.__index = ParserHTML
 
@@ -163,7 +169,7 @@ function ParserHTML:parse(data, isFile)
             self.lexycalAttributes.lineCount = self.lexycalAttributes.lineCount + 1
         end
     end
-    self.data = false; self.isFile = false; self:generateHTMLTree()
+    self.data = false; self.isFile = false; self:generateHTMLTree(); return self.htmlTree
 end
 
 function ParserHTML:getHTMLTree()

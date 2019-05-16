@@ -54,6 +54,7 @@ HTMLTree = setmetatable(HTMLTree, {
             getTags = function() return this.tags end,
             getDocument = function() return this.documentRoot end
         }, getmetatable(HTMLTree))
+        local tagTypes = {}
         for name, tag in pairs(elements) do
             returnObject[string.format("getElementsBy%s", name:gsub("^%l", string.upper))] = function() return elements[name] end
         end
@@ -100,6 +101,11 @@ HTMLTree = setmetatable(HTMLTree, {
                             tag.setContent("")
                             stack.peek().addChild(pseudoTag)
                         end
+                    end
+                    if not tagTypes[tag.getName()] then tagTypes[tag.getName()] = {} end
+                    table.insert(tagTypes[tag.getName()], tag)
+                    returnObject[string.format("get%s", tag.getName():gsub("^%l", string.upper))] = function()
+                        return tagTypes[tag.getName()]
                     end
                 end
             end
