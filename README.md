@@ -40,7 +40,7 @@ Below you can see all methods
 
 * getHTMLTree() - This Function return the HTML Tree of the data passed. The HTML Tree returned has the main method "getDocument" that will returns the root tag, it is, the first tag in your document, or a DIV auto-generated to help parse document.
 
-* getElementsBy... - Based on all tags in your HTML, if has a <Lua> tag in your HTML, MoonStar will generate in HTML Tree a function named getLua(), that return a table with all <Lua> tags. The same occurs to getElementsBy, but this returns elements selected by attributes, like: getElementsById()
+* getElementsBy... - Based on all tags in your HTML, if has a Lua tag in your HTML, MoonStar will generate in HTML Tree a function named getLua(), that return a table with all Lua tags. The same occurs to getElementsBy, but this returns elements selected by attributes, like: getElementsById()
 
 ## Goals
 

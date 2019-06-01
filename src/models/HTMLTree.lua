@@ -62,6 +62,10 @@ HTMLTree = setmetatable(HTMLTree, {
             local newTag = (this.documentRoot)(); newTag.setName("div")
             newTag.addChild(this.documentRoot); newTag.addChild(tag); this.documentRoot = newTag
         end
+        local function transferTagContent(tag)
+            local pseudoTag = this.documentRoot(); pseudoTag.setName("text")
+            pseudoTag.setContent(tag.getContent()); return pseudoTag
+        end
         --[[ Here will be construct the synthatic tree --]]
         local stack = Stack:new()
         for _, tag in pairs(tags) do
@@ -69,19 +73,21 @@ HTMLTree = setmetatable(HTMLTree, {
                 this.documentRoot = tag; stack.push(tag)
             else
                 if verifyCloseTag(tag) then
-                    while stack.peek() and tag:getName():sub(2) ~= stack.peek().getName() do
-                        stack.pop()
-                    end
-                    if stack.peek() then
-                        stack.pop()
-                        if #tag.getContent() > 0 and tag.getContent():gsub("\t+", ""):match("%S") ~= nil then                            
-                            local pseudoTag = this.documentRoot(); pseudoTag.setName("text")
-                            pseudoTag.setContent(tag.getContent())
-                            if stack.peek() then stack.peek().addChild(pseudoTag) end
+                    if tagTypes[tag.getName():gsub("/", "")] then
+                        while stack.peek() and tag:getName():sub(2) ~= stack.peek().getName() do
+                            stack.pop()
                         end
-                    else
-                        createNewRoot(tag)
-                        --[[ error("Syntax error found") --]]
+                        if stack.peek() then
+                            stack.pop()
+                            if #tag.getContent() > 0 and tag.getContent():gsub("\t+", ""):match("%S") ~= nil then
+                                if stack.peek() then stack.peek().addChild(transferTagContent(tag)) end
+                            end
+                        else
+                            createNewRoot(tag)
+                            --[[ error("Syntax error found") --]]
+                        end
+                    elseif #tag.getContent() > 0 and tag.getContent():gsub("\t+", ""):match("%S") ~= nil then
+                        if stack.peek() then stack.peek().addChild(transferTagContent(tag)) end
                     end
                 else
                     if stack.peek() then

@@ -165,7 +165,7 @@ function ParserHTML:parse(data, isFile)
     else
         self.filename = data or self.data
         for line in io.lines(data or self.data) do
-            self:deepParse(line)
+            self:deepParse(line) --[[ self:deepParse(string.format("%s\\n", line)) --]]
             self.lexycalAttributes.lineCount = self.lexycalAttributes.lineCount + 1
         end
     end
