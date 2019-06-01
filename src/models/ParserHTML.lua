@@ -23,7 +23,8 @@ function ParserHTML:new(data)
     return setmetatable({
         lexycalAttributes = {
             openTag = false, openString = false, current = {}, isAttribute = false,
-            previous = nil, tagLexeme = {}, tagInfo = nil, lineCount = 1, openComment = false
+            previous = nil, tagLexeme = {}, tagInfo = nil, lineCount = 1, openComment = false,
+            codeTags = {script = true}, openCode = false
         },
         data = data, htmlTree = nil, tokenList = {}, filename = "direct-parse",
         tags = {}, elements = {}, closeTags = {["/!document"] = true}
@@ -32,6 +33,10 @@ end
 
 local function tableString(stringTable)
     return string.format(("%s"):rep(#stringTable), table.unpack(stringTable))
+end
+
+function ParserHTML:addCodeTag(codeTag)
+    self.lexycalAttributes.codeTags[codeTag] = true
 end
 
 function ParserHTML:createTagInfo(name)
@@ -50,7 +55,13 @@ function ParserHTML:writeTokenEnd(column)
         if self.lexycalAttributes.tagInfo.name == "" then
             self.lexycalAttributes.tagInfo.name = name
             local tagType = name:sub(1, 3) == "!--" and "open-comment" or name:sub(1, 1) == "/" and "close-tag" or "open-tag"
-            if tagType == "open-comment" then self.lexycalAttributes.openComment = true elseif tagType == "close-tag" then self.closeTags[name] = true end
+            if tagType == "open-comment" then self.lexycalAttributes.openComment = true
+            elseif tagType == "close-tag" then
+                self.closeTags[name] = true
+                if self.lexycalAttributes.codeTags[name:gsub("/", "")] then self.lexycalAttributes.openCode = false end
+            elseif self.lexycalAttributes.codeTags[name] then
+                self.lexycalAttributes.openCode = name
+            end
             table.insert(self.tokenList, Token(name, tagType, self.lexycalAttributes.lineCount, column - #name, self.filename))
         elseif name ~= "/" then
             self.lexycalAttributes.tagInfo.attributes[name] = ""
@@ -136,7 +147,8 @@ function ParserHTML:deepParse(data)
                 end
             end
         else
-            if word == "<" and splited[_ + 1] ~= string.char(9) and splited[_ + 1] ~= string.char(32) then
+            if word == "<" and splited[_ + 1] ~= string.char(9) and splited[_ + 1] ~= string.char(32)
+             and (not self.lexycalAttributes.openCode or (self.lexycalAttributes.openCode and splited[_ + 1] == string.char(47))) then
                 self:writeTagContent()
                 if #self.tags <= 0 and #self.lexycalAttributes.tagInfo.content > 0 then
                     table.insert(self.tags, Tag({name = "div", attributes = {}, content = "", children = {}}))
