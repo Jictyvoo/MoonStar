@@ -45,4 +45,3 @@ Below you can see all methods
 ## Goals
 
 * Fix a bug when have a tag that can be closed or not closed
-* Fix the bug when in script content with "<" character detect as a tag

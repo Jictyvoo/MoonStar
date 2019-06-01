@@ -83,7 +83,7 @@ HTMLTree = setmetatable(HTMLTree, {
                                 if stack.peek() then stack.peek().addChild(transferTagContent(tag)) end
                             end
                         else
-                            createNewRoot(tag)
+                            --createNewRoot(tag)
                             --[[ error("Syntax error found") --]]
                         end
                     elseif #tag.getContent() > 0 and tag.getContent():gsub("\t+", ""):match("%S") ~= nil then

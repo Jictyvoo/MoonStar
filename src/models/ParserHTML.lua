@@ -147,7 +147,15 @@ function ParserHTML:deepParse(data)
                 end
             end
         else
-            if word == "<" and splited[_ + 1] ~= string.char(9) and splited[_ + 1] ~= string.char(32)
+            local isQuotation = (word == "\"" or word == "\'")
+            if self.lexycalAttributes.openCode and isQuotation or self.lexycalAttributes.openString then
+                if self.lexycalAttributes.openString and self.lexycalAttributes.openString == word then
+                    self.lexycalAttributes.openString = false
+                else
+                    self.lexycalAttributes.openString = word
+                end
+                table.insert(self.lexycalAttributes.tagLexeme, word)
+            elseif word == "<" and splited[_ + 1] ~= string.char(9) and splited[_ + 1] ~= string.char(32)
              and (not self.lexycalAttributes.openCode or (self.lexycalAttributes.openCode and splited[_ + 1] == string.char(47))) then
                 self:writeTagContent()
                 if #self.tags <= 0 and #self.lexycalAttributes.tagInfo.content > 0 then
