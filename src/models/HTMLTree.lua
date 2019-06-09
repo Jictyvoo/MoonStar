@@ -56,7 +56,13 @@ HTMLTree = setmetatable(HTMLTree, {
         }, getmetatable(HTMLTree))
         local tagTypes = {}
         for name, tag in pairs(elements) do
-            returnObject[string.format("getElementsBy%s", name:gsub("^%l", string.upper))] = function() return elements[name] end
+            returnObject[string.format("getElementsBy%s", name:gsub("^%l", string.upper))] = function(identifier)
+                if identifier then
+                    for key, value in pairs(elements[name]) do
+                        if value.getAttributes()[name] == identifier then return value end
+                    end
+                else return elements[name] end
+            end
         end
         local function createNewRoot(tag)
             local newTag = (this.documentRoot)(); newTag.setName("div")
