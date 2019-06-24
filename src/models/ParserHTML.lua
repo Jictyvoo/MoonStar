@@ -24,7 +24,7 @@ function ParserHTML:new(data)
         lexycalAttributes = {
             openTag = false, openString = false, current = {}, isAttribute = false,
             previous = nil, tagLexeme = {}, tagInfo = nil, lineCount = 1, openComment = false,
-            codeTags = {script = true}, openCode = false
+            codeTags = {script = true, style = true}, openCode = false
         },
         data = data, htmlTree = nil, tokenList = {}, filename = "direct-parse",
         tags = {}, elements = {}, closeTags = {["/!document"] = true}
@@ -58,7 +58,7 @@ function ParserHTML:writeTokenEnd(column)
             if tagType == "open-comment" then self.lexycalAttributes.openComment = true
             elseif tagType == "close-tag" then
                 self.closeTags[name] = true
-                if self.lexycalAttributes.codeTags[name:gsub("/", "")] then self.lexycalAttributes.openCode = false end
+                if self.lexycalAttributes.codeTags[name:gsub("/", "")] and name:gsub("/", "") == self.lexycalAttributes.openCode then self.lexycalAttributes.openCode = false end
             elseif self.lexycalAttributes.codeTags[name] then
                 self.lexycalAttributes.openCode = name
             end
@@ -148,10 +148,10 @@ function ParserHTML:deepParse(data)
             end
         else
             local isQuotation = (word == "\"" or word == "\'")
-            if self.lexycalAttributes.openCode and isQuotation or self.lexycalAttributes.openString then
+            if self.lexycalAttributes.openCode and isQuotation or self.lexycalAttributes.openString then                
                 if self.lexycalAttributes.openString and self.lexycalAttributes.openString == word then
                     self.lexycalAttributes.openString = false
-                else
+                elseif isQuotation then
                     self.lexycalAttributes.openString = word
                 end
                 table.insert(self.lexycalAttributes.tagLexeme, word)
